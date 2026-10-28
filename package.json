@@ -1,0 +1,26 @@
+{
+  "name": "chaos-arena",
+  "version": "1.0.0",
+  "description": "Multiplayer 2D Arcade Game with Chaos Events",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "multiplayer",
+    "game",
+    "socket.io",
+    "canvas",
+    "arcade"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.3.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
+  }
+}
