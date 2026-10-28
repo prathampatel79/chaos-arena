@@ -236,6 +236,7 @@ test('7. Synchronized Movement & Authoritative Bounds: Server processes input ve
   assert.ok(hostP2.x > startX, 'Player position X must advance with move input');
   assert.ok(hostP2.x <= room.arena.width, 'Player position must not exceed arena bounds');
 
+  room.cleanup();
   host.disconnect();
   guest.disconnect();
 });
@@ -260,6 +261,7 @@ test('8. Anti-Cheat Security: Reject client requests to directly set scores or d
   const player = room.players.get(host.id);
   assert.equal(player.score, 0, 'Score must remain 0, unaffected by client exploits');
 
+  room.cleanup();
   host.disconnect();
 });
 
@@ -284,6 +286,10 @@ test('9. Coin Collection & Magnet: Server awards points on proximity and prevent
   // Teleport player directly onto coin to test authoritative collision & single-collection guarantee
   player.x = coin.x;
   player.y = coin.y;
+  player.vx = 0;
+  player.vy = 0;
+  player.inputX = 0;
+  player.inputY = 0;
 
   // Advance game tick
   room.gameTick();
@@ -296,6 +302,7 @@ test('9. Coin Collection & Magnet: Server awards points on proximity and prevent
   room.gameTick();
   assert.equal(player.score, 10, 'Duplicate collection must be prevented');
 
+  room.cleanup();
   host.disconnect();
 });
 
@@ -331,10 +338,15 @@ test('10. Power-Ups: Speed, Shield, Magnet, Double Score apply real status and e
   const coin = room.coins.find(c => !c.collected);
   player.x = coin.x;
   player.y = coin.y;
+  player.vx = 0;
+  player.vy = 0;
+  player.inputX = 0;
+  player.inputY = 0;
   room.gameTick();
 
   assert.equal(player.score, 20, 'Coin score must be doubled (10 * 2 = 20)');
 
+  room.cleanup();
   host.disconnect();
 });
 
