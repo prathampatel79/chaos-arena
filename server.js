@@ -20,7 +20,8 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
-// Serve static frontend assets
+// Serve static frontend assets (from root and public)
+app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 

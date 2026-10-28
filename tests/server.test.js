@@ -170,7 +170,7 @@ test('5. Host Permissions: Only host can modify settings or start match', async 
   guest.disconnect();
 });
 
-test('6. Start Match Threshold & Quick Test Mode: Enforce min 4 in normal, min 2 in test mode', async () => {
+test('6. Start Match Threshold & Quick Test Mode: Enforce min 4 in normal, min 1 in test mode', async () => {
   const host = createClient();
   const guest = createClient();
 
@@ -182,6 +182,10 @@ test('6. Start Match Threshold & Quick Test Mode: Enforce min 4 in normal, min 2
   guest.emit('JOIN_LOBBY', { playerName: 'GuestGuy', roomCode });
   await waitForEvent(guest, 'LOBBY_JOINED');
 
+  // Disable test mode to test standard 4-player threshold
+  host.emit('SET_TEST_MODE', { testMode: false });
+  await waitForEvent(guest, 'LOBBY_UPDATE');
+
   // Try to start in normal mode with 2 players -> rejected
   host.emit('START_MATCH');
   const err = await waitForEvent(host, 'ERROR');
@@ -189,9 +193,9 @@ test('6. Start Match Threshold & Quick Test Mode: Enforce min 4 in normal, min 2
 
   // Host enables Quick Test Mode
   host.emit('SET_TEST_MODE', { testMode: true });
-  await waitForEvent(host, 'LOBBY_UPDATE');
+  await waitForEvent(guest, 'LOBBY_UPDATE');
 
-  // Host starts match in Quick Test Mode with 2 players -> Countdown triggers!
+  // Host starts match in Quick Test Mode with players -> Countdown triggers!
   host.emit('START_MATCH');
   const cdHost = await waitForEvent(host, 'COUNTDOWN_START');
   const cdGuest = await waitForEvent(guest, 'COUNTDOWN_START');

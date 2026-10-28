@@ -48,8 +48,12 @@
 
           <!-- LOBBY ACTIONS -->
           <div class="menu-actions">
+            <button id="btn-solo-practice" class="btn btn-success btn-glow-green">
+              <span class="btn-icon">🎮</span> PLAY SOLO PRACTICE (INSTANT)
+            </button>
+
             <button id="btn-create-lobby" class="btn btn-primary btn-glow">
-              <span class="btn-icon">⚡</span> CREATE LOBBY
+              <span class="btn-icon">⚡</span> CREATE MULTIPLAYER LOBBY
             </button>
 
             <div class="join-box">
@@ -115,10 +119,10 @@
             </div>
             <div class="setting-item toggle-item">
               <label for="toggle-test-mode" class="toggle-label">
-                <span>Quick Test Mode (Min 2 Players):</span>
-                <span class="subtext">Exhibition requires 4 players by default</span>
+                <span>Quick Test / Solo Mode (Min 1 Player):</span>
+                <span class="subtext">Allow launching match immediately for 1+ players</span>
               </label>
-              <input type="checkbox" id="toggle-test-mode" class="cyber-toggle">
+              <input type="checkbox" id="toggle-test-mode" class="cyber-toggle" checked>
             </div>
           </div>
         </div>
@@ -377,6 +381,12 @@
             <input type="checkbox" id="toggle-bgm" class="cyber-toggle" checked>
           </div>
 
+          <div class="setting-row">
+            <label for="input-custom-server">Multiplayer Server URL (Optional for GitHub Pages):</label>
+            <input type="text" id="input-custom-server" placeholder="e.g. http://192.168.1.50:3000">
+            <span class="input-hint">Leave blank to use current origin. Set this when playing via GitHub Pages.</span>
+          </div>
+
           <div class="test-sound-wrap">
             <button id="btn-test-sound" class="btn btn-outline">
               🔊 Test Sound FX
@@ -391,8 +401,8 @@
 
   </div>
 
-  <!-- SOCKET.IO CLIENT SCRIPT (Served automatically by Express/Socket.IO) -->
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- SOCKET.IO CLIENT SCRIPT (CDN with local fallback for GitHub Pages compatibility) -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
   <!-- APPLICATION SCRIPTS -->
   <script src="js/audio.js"></script>

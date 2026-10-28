@@ -23,12 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Menu Elements
   const playerNameInput = document.getElementById('player-name-input');
   const roomCodeInput = document.getElementById('room-code-input');
+  const btnSoloPractice = document.getElementById('btn-solo-practice');
   const btnCreateLobby = document.getElementById('btn-create-lobby');
   const btnJoinLobby = document.getElementById('btn-join-lobby');
   const btnHowToPlay = document.getElementById('btn-how-to-play');
   const btnSettings = document.getElementById('btn-settings');
   const lanInfoBanner = document.getElementById('lan-info-banner');
   const lanText = document.getElementById('lan-text');
+  const inputCustomServer = document.getElementById('input-custom-server');
 
   // Lobby Elements
   const lobbyRoomCode = document.getElementById('lobby-room-code');
@@ -103,6 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedName = localStorage.getItem('chaos_arena_player_name');
     if (savedName && playerNameInput) {
       playerNameInput.value = savedName;
+    }
+
+    const savedServer = localStorage.getItem('chaos_arena_custom_server');
+    if (savedServer && inputCustomServer) {
+      inputCustomServer.value = savedServer;
     }
 
     // Check URL search params for direct room link (e.g. ?room=XYZ123)
@@ -229,6 +236,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- MAIN MENU ACTIONS ---
+  if (btnSoloPractice) {
+    btnSoloPractice.addEventListener('click', () => {
+      const name = playerNameInput.value.trim() || 'SoloFighter';
+      localStorage.setItem('chaos_arena_player_name', name);
+      audio.init();
+      network.startSoloPractice(name);
+      showToast('Starting Solo Practice match...');
+    });
+  }
+
+  if (inputCustomServer) {
+    inputCustomServer.addEventListener('change', (e) => {
+      localStorage.setItem('chaos_arena_custom_server', e.target.value.trim());
+      showToast('Multiplayer server URL updated.');
+    });
+  }
+
   btnCreateLobby.addEventListener('click', () => {
     const name = playerNameInput.value.trim();
     if (!name) {
@@ -346,6 +370,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnStartMatch.addEventListener('click', () => {
     if (network.isHost) {
+      if (toggleTestMode && !toggleTestMode.checked) {
+        // If host clicks start with fewer than 4 players, automatically enable test mode so it launches!
+        const count = parseInt(rosterCount.textContent) || 1;
+        if (count < 4) {
+          showToast('Enabling Quick Test Mode to launch match...');
+          toggleTestMode.checked = true;
+          network.setTestMode(true);
+          setTimeout(() => network.startMatch(), 150);
+          return;
+        }
+      }
       network.startMatch();
     }
   });
@@ -356,6 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- NETWORK EVENT BINDINGS ---
+  network.on('return_menu', () => {
+    switchScreen('menu');
+  });
   network.on('lobby_created', (data) => {
     updateLobbyView(data.lobbyState);
     switchScreen('lobby');
@@ -405,16 +443,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start requirements
     const min = state.minPlayers;
     const count = state.players.length;
-    const canStart = isHost && count >= min;
+    const canStart = isHost && (count >= min || state.testMode);
 
     btnStartMatch.style.display = isHost ? 'inline-flex' : 'none';
     btnStartMatch.disabled = !canStart;
+    btnStartMatch.innerHTML = count === 1 ? '🚀 LAUNCH MATCH (SOLO TEST)' : `🚀 LAUNCH ARENA MATCH (${count} PLAYERS)`;
 
     if (isHost) {
-      if (count < min) {
-        startReqHint.textContent = `Need ${min - count} more player(s) to start (Min ${min}).`;
+      if (count < min && !state.testMode) {
+        startReqHint.textContent = `Need ${min - count} more player(s) for standard 4-player match (or click Start to launch in Test Mode).`;
+        btnStartMatch.disabled = false; // Always allow host to launch!
       } else {
-        startReqHint.textContent = `Ready! ${count} players in lobby.`;
+        startReqHint.textContent = `Ready to launch! ${count} player(s) in lobby.`;
       }
     } else {
       startReqHint.textContent = `Waiting for host to launch the match (${count}/${min} required)...`;
